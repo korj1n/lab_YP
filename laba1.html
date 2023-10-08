@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Нахождение значения y</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+        }
+        
+        .container {
+            max-width: 500px;
+            margin: 0 auto;
+            padding: 20px;
+            text-align: center;
+        }
+        
+        h1 {
+            margin-bottom: 20px;
+        }
+        
+        input {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 10px;
+        }
+        
+        button {
+            
+            color: black;
+            padding: 10px 20px;
+            border: 15 px;
+            cursor: pointer;
+
+        }
+        
+        #result {
+            margin-top: 20px;
+            font-weight: bold;
+        }
+        
+        #equation-image {
+            max-width: 100%;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Нахождение значения y</h1>
+        
+        <img id="equation-image" src="https://i.ibb.co/HFLSZfK/2023-05-17-222157.png" alt="Уравнение">
+        
+        <input type="number" id="x" placeholder="Введите значение x">
+        <input type="number" id="y" placeholder="Введите значение y">
+        <input type="number" id="z" placeholder="Введите значение z">
+        
+        <button onclick="calculateY()">Вычислить</button>
+        
+        <div id="result"></div>
+    </div>
+    
+    <script>
+        function calculateY() {
+            var x = parseFloat(document.getElementById("x").value);
+            var y = parseFloat(document.getElementById("y").value);
+            var z = parseFloat(document.getElementById("z").value);
+            
+            var absX = Math.abs(x);
+            var absXSquared = Math.pow(absX, y);
+            
+            var result;
+            
+            if (absXSquared > z) {
+                result = Math.pow(x, 3) * Math.abs(Math.sin(y));
+            } else if (-z <= absXSquared && absXSquared <= z) {
+                result = Math.max(x, y, z);
+            } else {
+                result = Math.min(y, z);
+            }
+            
+            document.getElementById("result").innerHTML = "Значение y: " + result;
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Поиск предприятий по изделию</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+    }
+    h1 {
+      text-align: center;
+    }
+    #input-form {
+      width: 400px;
+      margin: 20px auto;
+    }
+    #output {
+      width: 400px;
+      margin: 0 auto;
+      padding: 10px;
+      border: 1px solid #ccc;
+    }
+  </style>
+</head>
+<body>
+  <h1>Поиск предприятий по изделию</h1>
+  <div id="input-form">
+    <label for="manufacturer">Название предприятия:</label><br>
+    <input type="text" id="manufacturer" /><br>
+    <label for="product">Название изделия:</label><br>
+    <input type="text" id="product" /><br>
+    <label for="quantity">Количество изделий в год:</label><br>
+    <input type="number" id="quantity" /><br>
+    <button onclick="addProduct()">Добавить изделие</button>
+    <button onclick="findManufacturers()">Найти предприятия</button>
+    <button onclick="saveData()">Сохранить данные</button>
+    <button onclick="loadData()">Загрузить данные</button>
+  </div>
+  <div id="output"></div>
+
+  <h2>Список предприятий:</h2>
+  <ul id="manufacturer-list"></ul>
+
+  <h2>Список изделий:</h2>
+  <ul id="product-list"></ul>
+
+  <script>
+    var manufacturersData = [];
+
+    // Функция для добавления изделия в данные о предприятиях
+    function addProduct() {
+      var manufacturerInput = document.getElementById('manufacturer').value;
+      var productInput = document.getElementById('product').value;
+      var quantityInput = parseInt(document.getElementById('quantity').value);
+
+      // Проверяем, что все поля заполнены
+      if (manufacturerInput === '' || productInput === '' || isNaN(quantityInput)) {
+        alert('Пожалуйста, заполните все поля корректно.');
+        return;
+      }
+
+      // Проверяем, существует ли предприятие в данных
+      var manufacturerIndex = manufacturersData.findIndex(function(manufacturer) {
+        return manufacturer.name === manufacturerInput;
+      });
+
+      // Если предприятие не найдено, добавляем его в данные
+      if (manufacturerIndex === -1) {
+        manufacturersData.push({
+          name: manufacturerInput,
+          products: [{ name: productInput, quantity: quantityInput }]
+        });
+      } else {
+        // Если предприятие уже существует, добавляем изделие к нему
+        manufacturersData[manufacturerIndex].products.push({
+          name: productInput,
+          quantity: quantityInput
+        });
+      }
+
+      // Очищаем поля ввода
+      document.getElementById('manufacturer').value = '';
+      document.getElementById('product').value = '';
+      document.getElementById('quantity').value = '';
+
+      // Обновляем списки предприятий и изделий
+      updateManufacturerList();
+      updateProductList();
+    }
+
+    // Функция для обновления списка предприятий
+    function updateManufacturerList() {
+      var manufacturerListElement = document.getElementById('manufacturer-list');
+      manufacturerListElement.innerHTML = '';
+
+      for (var i = 0; i < manufacturersData.length; i++) {
+        var manufacturer = manufacturersData[i];
+        var listItem = document.createElement('li');
+        listItem.textContent = manufacturer.name;
+        manufacturerListElement.appendChild(listItem);
+      }
+    }
+
+    // Функция для обновления списка изделий
+    function updateProductList() {
+      var productListElement = document.getElementById('product-list');
+      productListElement.innerHTML = '';
+
+      var products = [];
+
+      for (var i = 0; i < manufacturersData.length; i++) {
+        var manufacturer = manufacturersData[i];
+        var manufacturerProducts = manufacturer.products;
+
+        for (var j = 0; j < manufacturerProducts.length; j++) {
+          var product = manufacturerProducts[j];
+          var existingProduct = products.find(function(item) {
+            return item.name === product.name;
+          });
+
+          if (existingProduct) {
+            existingProduct.quantity += product.quantity;
+          } else {
+            products.push({ name: product.name, quantity: product.quantity });
+          }
+        }
+      }
+
+      products.sort(function(a, b) {
+        return b.quantity - a.quantity;
+      });
+
+      for (var k = 0; k < products.length; k++) {
+        var productItem = document.createElement('li');
+        productItem.textContent = products[k].name + ' (Объем выпуска: ' + products[k].quantity + ')';
+        productListElement.appendChild(productItem);
+      }
+    }
+
+    // Функция для поиска предприятий по изделию
+    function findManufacturers() {
+      var productInput = document.getElementById('product').value.toLowerCase();
+
+      var manufacturers = [];
+
+      for (var i = 0; i < manufacturersData.length; i++) {
+        var manufacturer = manufacturersData[i];
+        var products = manufacturer.products;
+
+        var foundProduct = products.find(function(item) {
+          return item.name.toLowerCase() === productInput;
+        });
+
+        if (foundProduct) {
+          manufacturers.push({ name: manufacturer.name, quantity: foundProduct.quantity });
+        }
+      }
+
+      manufacturers.sort(function(a, b) {
+        return b.quantity - a.quantity;
+      });
+
+      var outputElement = document.getElementById('output');
+      outputElement.innerHTML = '';
+
+      if (manufacturers.length > 0) {
+        var maxManufacturer = manufacturers[0];
+        var result = document.createElement('p');
+        result.textContent = 'Предприятие с максимальным выпуском изделия "' + productInput + '": ' + maxManufacturer.name;
+        outputElement.appendChild(result);
+
+        var listTitle = document.createElement('p');
+        listTitle.textContent = 'Список предприятий в порядке убывания объема выпуска изделия "' + productInput + '":';
+        outputElement.appendChild(listTitle);
+
+        for (var j = 0; j < manufacturers.length; j++) {
+          var manufacturer = manufacturers[j];
+          var manufacturerTitle = document.createElement('p');
+          manufacturerTitle.textContent = 'Предприятие: ' + manufacturer.name;
+          outputElement.appendChild(manufacturerTitle);
+
+          var productList = document.createElement('ul');
+          var products = getManufacturerProducts(manufacturer.name, productInput);
+          for (var k = 0; k < products.length; k++) {
+            var productItem = document.createElement('li');
+            productItem.textContent = 'Изделие: ' + products[k].name + ', Количество: ' + products[k].quantity;
+            productList.appendChild(productItem);
+          }
+          outputElement.appendChild(productList);
+        }
+      } else {
+        var message = document.createElement('p');
+        message.textContent = 'Изделие "' + productInput + '" не производится ни на одном предприятии.';
+        outputElement.appendChild(message);
+      }
+    }
+
+    // Функция для получения изделий определенного предприятия
+    function getManufacturerProducts(manufacturerName, productInput) {
+      var manufacturerIndex = manufacturersData.findIndex(function(manufacturer) {
+        return manufacturer.name === manufacturerName;
+      });
+
+      if (manufacturerIndex !== -1) {
+        var products = manufacturersData[manufacturerIndex].products;
+        var filteredProducts = products.filter(function(product) {
+          return product.name.toLowerCase() === productInput;
+        });
+        return filteredProducts;
+      }
+
+      return [];
+    }
+
+    // Функция для сохранения данных в локальное хранилище
+    function saveData() {
+      localStorage.setItem('manufacturersData', JSON.stringify(manufacturersData));
+      alert('Данные успешно сохранены.');
+    }
+
+    // Функция для загрузки данных из локального хранилища
+    function loadData() {
+      var storedData = localStorage.getItem('manufacturersData');
+      if (storedData) {
+        manufacturersData = JSON.parse(storedData);
+        alert('Данные успешно загружены.');
+        updateManufacturerList();
+        updateProductList();
+      } else {
+        alert('Нет сохраненных данных.');
+      }
+    }
+  </script>
+</body>
+</html>

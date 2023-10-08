@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Сжатие двусвязного списка</title>
+  <script>
+    function compressLinkedList() {
+      var input = document.getElementById("listInput").value;
+      var words = input.split(" ");
+
+      var uniqueWords = [];
+      var visitedWords = {};
+
+      for (var i = 0; i < words.length; i++) {
+        var word = words[i];
+        if (!visitedWords[word]) {
+          uniqueWords.push(word);
+          visitedWords[word] = true;
+        }
+      }
+
+      var result = uniqueWords.join(" ");
+      document.getElementById("compressedList").textContent = result;
+    }
+  </script>
+</head>
+<body>
+  <h1>Сжатие двусвязного списка</h1>
+  <p>Введите слова английского алфавита через пробел:</p>
+  <input type="text" id="listInput">
+  <button onclick="compressLinkedList()">Сжать список</button>
+  <p>Сжатый список:</p>
+  <p id="compressedList"></p>
+</body>
+</html>

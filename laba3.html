@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>№3</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+    }
+    h1 {
+      text-align: center;
+    }
+    #matrix-input {
+      width: 400px;
+      margin: 20px auto;
+    }
+    #output {
+      width: 400px;
+      margin: 0 auto;
+      padding: 10px;
+      border: 1px solid #ccc;
+    }
+  </style>
+</head>
+<body>
+  <h1>Поиск общих чисел в квадратной матрице</h1>
+  <div id="matrix-input">
+    <label for="matrix">Введите квадратную матрицу:</label><br>
+    <textarea id="matrix" rows="4" cols="50"></textarea><br>
+    <button onclick="findCommonNumbers()">Найти общие числа</button>
+  </div>
+  <div id="output"></div>
+
+  <script>
+    // Функция для поиска общих чисел в столбцах матрицы
+    function findCommonNumbers() {
+      // Получаем введенную пользователем матрицу
+      var matrixInput = document.getElementById('matrix').value;
+
+      // Преобразуем текстовый ввод в двумерный массив
+      var matrix = matrixInput.trim().split('\n').map(function(row) {
+        return row.trim().split(' ').map(Number);
+      });
+
+      // Проверяем, является ли введенная матрица квадратной
+      var isValidMatrix = matrix.every(function(row) {
+        return row.length === matrix.length;
+      });
+
+      if (!isValidMatrix) {
+        var outputElement = document.getElementById('output');
+        outputElement.innerHTML = '<p>Ошибка: Введенная матрица не является квадратной.</p>';
+        return;
+      }
+
+      var commonNumbers = [];
+
+      // Проверяем каждое число в первом столбце
+      for (var i = 0; i < matrix.length; i++) {
+        var number = matrix[i][0];
+        var isCommon = true;
+
+        // Проверяем, есть ли число в остальных столбцах
+        for (var j = 1; j < matrix[i].length; j++) {
+          if (matrix[i].indexOf(number) === -1) {
+            isCommon = false;
+            break;
+          }
+        }
+
+        // Если число есть во всех столбцах, добавляем его в массив общих чисел
+        if (isCommon) {
+          commonNumbers.push(number);
+        }
+      }
+
+      // Получаем ссылку на элемент вывода
+      var outputElement = document.getElementById('output');
+
+      // Очищаем содержимое вывода
+      outputElement.innerHTML = '';
+
+      // Выводим результат на страницу
+      if (commonNumbers.length > 0) {
+        var result = document.createElement('p');
+        result.textContent = 'Общие числа: ' + commonNumbers.join(', ');
+        outputElement.appendChild(result);
+      } else {
+        var message = document.createElement('p');
+        message.textContent = 'Общих чисел нет.';
+        outputElement.appendChild(message);
+      }
+    }
+  </script>
+</body>
+</html>

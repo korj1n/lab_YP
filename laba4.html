@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Сложение матриц</title>
+  <style>
+    table {
+      border-collapse: collapse;
+      margin-bottom: 10px;
+    }
+
+    th, td {
+      border: 1px solid black;
+      padding: 5px;
+    }
+  </style>
+  <script type="text/javascript">
+    function addMatrices() {
+      var matrixA = getMatrixValues("matrixA");
+      var matrixB = getMatrixValues("matrixB");
+
+      if (matrixA && matrixB) {
+        if (matrixA.length === matrixB.length && matrixA[0].length === matrixB[0].length) {
+          var matrixC = [];
+          var rows = matrixA.length;
+          var cols = matrixA[0].length;
+
+          for (var i = 0; i < rows; i++) {
+            matrixC[i] = [];
+            for (var j = 0; j < cols; j++) {
+              matrixC[i][j] = matrixA[i][j] + matrixB[i][j];
+            }
+          }
+
+          displayMatrix("matrixC", matrixC);
+        } else {
+          alert("Размеры матриц не совпадают.");
+        }
+      }
+    }
+
+    function getMatrixValues(matrixId) {
+      var matrix = [];
+      var rows = document.getElementById(matrixId).getElementsByTagName("tr");
+
+      for (var i = 0; i < rows.length; i++) {
+        var cols = rows[i].getElementsByTagName("input");
+        matrix[i] = [];
+        for (var j = 0; j < cols.length; j++) {
+          matrix[i][j] = parseFloat(cols[j].value);
+        }
+      }
+
+      return matrix;
+    }
+
+    function displayMatrix(matrixId, matrix) {
+      var table = document.getElementById(matrixId);
+      table.innerHTML = "";
+
+      for (var i = 0; i < matrix.length; i++) {
+        var row = document.createElement("tr");
+        for (var j = 0; j < matrix[i].length; j++) {
+          var cell = document.createElement("td");
+          cell.textContent = matrix[i][j];
+          row.appendChild(cell);
+        }
+        table.appendChild(row);
+      }
+    }
+  </script>
+</head>
+<body>
+  <h1>Сложение матриц</h1>
+
+  <h2>Матрица A</h2>
+  <table id="matrixA">
+    <tr>
+      <td><input type="number" step="any"></td>
+      <td><input type="number" step="any"></td>
+    </tr>
+    <tr>
+      <td><input type="number" step="any"></td>
+      <td><input type="number" step="any"></td>
+    </tr>
+  </table>
+
+  <h2>Матрица B</h2>
+  <table id="matrixB">
+    <tr>
+      <td><input type="number" step="any"></td>
+      <td><input type="number" step="any"></td>
+    </tr>
+    <tr>
+      <td><input type="number" step="any"></td>
+      <td><input type="number" step="any"></td>
+    </tr>
+  </table>
+
+  <button onclick="addMatrices()">Сложить матрицы</button>
+
+  <h2>Матрица C (A + B)</h2>
+  <table id="matrixC">
+    <tr>
+      <th>C<sub>11</sub></th>
+      <th>C<sub>12</sub></th>
+    </tr>
+    <tr>
+      <th>C<sub>21</sub></th>
+      <th>C<sub>22</sub></th>
+    </tr>
+  </table>
+</body>
+</html>

@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Матрица и ее обратная</title>
+    <style>
+        /* Стили для кнопки */
+        .button {
+            background-color: #7003afe5;
+            border: none;
+            color: white;
+            padding: 16px 32px;
+            text-align: center;
+            font-size: 16px;
+            margin: 8px 4px;
+            cursor: pointer;
+            border-radius: 12px;
+            /* Закругление углов */
+        }
+
+        /* Стили для полей ввода */
+        input[type="number"] {
+            width: 64px;
+            height: 32px;
+            font-size: 16px;
+            text-align: center;
+            padding: 4px;
+            margin: 8px 4px;
+            border-radius: 8px;
+            /* Закругление углов */
+            border: 1px solid #ccc;
+        }
+
+        /* Стили для таблицы */
+        table {
+            border-collapse: collapse;
+            margin: 16px 0;
+        }
+
+        th,
+        td {
+            border: 1px solid #ccc;
+            padding: 8px;
+            text-align: center;
+        }
+
+        th {
+            background-color: #f2f2f2;
+        }
+    </style>
+
+    <script>
+        function calculateMatrix() {
+            var matrixA = [];
+            var matrixX = [];
+
+            // Заполнение матрицы A из полей ввода
+            for (var i = 0; i < 4; i++) {
+                matrixA[i] = [];
+                for (var j = 0; j < 5; j++) {
+                    var input = document.getElementById("input-" + i + "-" + j);
+                    matrixA[i][j] = Number(input.value);
+                }
+            }
+
+            var steps = [];
+
+            // Создание матрицы X из A без последнего столбца
+            var step1 = {
+                description: "Создание матрицы X из A без последнего столбца",
+                matrix: []
+            };
+            for (var i = 0; i < 4; i++) {
+                step1.matrix[i] = [];
+                for (var j = 0; j < 4; j++) {
+                    step1.matrix[i][j] = matrixA[i][j];
+                }
+            }
+            steps.push(step1);
+
+            // Нахождение определителя матрицы X
+            var determinantX = calculateDeterminant(step1.matrix).toFixed(2);
+            var step2 = {
+                description: "Нахождение определителя матрицы X",
+                determinant: determinantX
+            };
+            steps.push(step2);
+
+            // Нахождение обратной матрицы X
+            var inverseX = calculateInverse(step1.matrix);
+            var step3 = {
+                description: "Нахождение обратной матрицы X",
+                matrix: inverseX
+            };
+            steps.push(step3);
+
+            // Вывод результатов
+            var matrixAText = "Матрица A:<br>" + matrixToString(matrixA);
+            var stepsText = "Шаги решения:<br>" + stepsToString(steps);
+
+            document.getElementById("matrixA").innerHTML = matrixAText;
+            document.getElementById("steps").innerHTML = stepsText;
+        }
+
+        function calculateDeterminant(matrix) {
+            // Расчет определителя матрицы методом разложения по первой строке
+            if (matrix.length === 2 && matrix[0].length === 2) {
+                return matrix[0][0] * matrix[1][1] - matrix[0][1] * matrix[1][0];
+            }
+
+            var determinant = 0;
+            for (var j = 0; j < matrix[0].length; j++) {
+                var subMatrix = [];
+                for (var i = 1; i < matrix.length; i++) {
+                    subMatrix[i - 1] = matrix[i].filter(function (_, index) {
+                        return index !== j;
+                    });
+                }
+                determinant += matrix[0][j] * Math.pow(-1, j) * calculateDeterminant(subMatrix);
+            }
+            return determinant;
+        }
+
+        function calculateInverse(matrix) {
+            var identityMatrix = createIdentityMatrix(matrix.length);
+
+            // Прямой ход метода Гаусса с выбором главного элемента
+        for (var i = 0; i < matrix.length; i++) {
+            var maxRow = i;
+            for (var j = i + 1; j < matrix.length; j++) {
+                if (Math.abs(matrix[j][i]) > Math.abs(matrix[maxRow][i])) {
+                    maxRow = j;
+                }
+            }
+            if (i !== maxRow) {
+                var tmp = matrix[i];
+                matrix[i] = matrix[maxRow];
+                matrix[maxRow] = tmp;
+
+                tmp = identityMatrix[i];
+                identityMatrix[i] = identityMatrix[maxRow];
+                identityMatrix[maxRow] = tmp;
+            }
+
+            var diagonalElement = matrix[i][i];
+
+            for (var k = i; k < matrix[i].length; k++) {
+                matrix[i][k] /= diagonalElement;
+            }
+            for (var k = 0; k < identityMatrix[i].length; k++) {
+                identityMatrix[i][k] /= diagonalElement;
+            }
+
+            for (var j = i + 1; j < matrix.length; j++) {
+                var multiplier = matrix[j][i];
+                for (var k = i; k < matrix[j].length; k++) {
+                    matrix[j][k] -= multiplier * matrix[i][k];
+                }
+                for (var k = 0; k < identityMatrix[j].length; k++) {
+                    identityMatrix[j][k] -= multiplier * identityMatrix[i][k];
+                }
+            }
+        }
+
+        // Обратный ход метода Гаусса
+        for (var i = matrix.length - 1; i >= 0; i--) {
+            for (var j = i - 1; j >= 0; j--) {
+                var multiplier = matrix[j][i];
+                for (var k = 0; k < matrix[j].length; k++) {
+                    matrix[j][k] -= multiplier * matrix[i][k];
+                }
+                for (var k = 0; k < identityMatrix[j].length; k++) {
+                    identityMatrix[j][k] -= multiplier * identityMatrix[i][k];
+                }
+            }
+        }
+
+        return identityMatrix;
+    }
+
+    function createIdentityMatrix(size) {
+        var matrix = [];
+        for (var i = 0; i < size; i++) {
+            matrix[i] = [];
+            for (var j = 0; j < size; j++) {
+                matrix[i][j] = i === j ? 1 : 0;
+            }
+        }
+        return matrix;
+    }
+
+    function matrixToString(matrix) {
+        var result = "<table>";
+        for (var i = 0; i < matrix.length; i++) {
+            result += "<tr>";
+            for (var j = 0; j < matrix[i].length; j++) {
+                result += "<td>" + matrix[i][j] + "</td>";
+            }
+            result += "</tr>";
+        }
+        result += "</table>";
+        return result;
+    }
+
+    function stepsToString(steps) {
+        var result = "<ol>";
+        for (var i = 0; i < steps.length; i++) {
+            result += "<li>" + steps[i].description + "</li>";
+            if (steps[i].matrix !== undefined) {
+                result += matrixToString(steps[i].matrix);
+            } else if (steps[i].determinant !== undefined) {
+                result += "Определитель матрицы X: " + steps[i].determinant + "<br>";
+            }
+        }
+        result += "</ol>";
+        return result;
+    }
+
+    function checkInputs() {
+        // Получение всех полей ввода
+        var inputs = document.getElementsByTagName("input");
+
+        // Проверка, заполнены ли все поля
+        for (var i = 0; i < inputs.length; i++) {
+            if (inputs[i].value === "") {
+                return;
+            }
+        }
+
+        // Если все поля заполнены, вызываем функцию calculateMatrix()
+        calculateMatrix();
+    }
+</script>
+</head>
+
+<body>
+<h2>Матрица и ее обратная</h2>
+
+<table>
+    <tr>
+        <th>x1</th>
+        <th>x2</th>
+        <th>x3</th>
+        <th>x4</th>
+        <th>b</th>
+    </tr>
+    <tr>
+        <td><input type="number" id="input-0-0"></td>
+        <td><input type="number" id="input-0-1"></td>
+        <td><input type="number" id="input-0-2"></td>
+        <td><input type="number" id="input-0-3"></td>
+        <td><input type="number" id="input-0-4"></td>
+        </tr>
+        <tr>
+        <td><input type="number" id="input-1-0"></td>
+        <td><input type="number" id="input-1-1"></td>
+        <td><input type="number" id="input-1-2"></td>
+        <td><input type="number" id="input-1-3"></td>
+        <td><input type="number" id="input-1-4"></td>
+        </tr>
+        <tr>
+        <td><input type="number" id="input-2-0"></td>
+        <td><input type="number" id="input-2-1"></td>
+        <td><input type="number" id="input-2-2"></td>
+        <td><input type="number" id="input-2-3"></td>
+        <td><input type="number" id="input-2-4"></td>
+        </tr>
+        <tr>
+        <td><input type="number" id="input-3-0"></td>
+        <td><input type="number" id="input-3-1"></td>
+        <td><input type="number" id="input-3-2"></td>
+        <td><input type="number" id="input-3-3"></td>
+        <td><input type="number" id="input-3-4"></td>
+        </tr>
+        </table>
+        
+        <button class="button" onclick="checkInputs()">Решить</button>
+        
+        <div id="matrixA"></div>
+        <div id="steps"></div>
+        </body>
+        
+        </html>
